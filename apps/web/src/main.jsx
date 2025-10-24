@@ -1,25 +1,27 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
+import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import StoreCheckin from "./pages/StoreCheckin.jsx";
 
-function App() {
-  const [pong, setPong] = React.useState(null);
+const Home = () => (
+  <div style={{ fontFamily: "sans-serif", padding: 24 }}>
+    <h1>Cre8-BOT</h1>
+    <p>Choisis un magasin pour commencer :</p>
+    <ul>
+      <li><Link to="/s/nyc">New York</Link></li>
+      <li><Link to="/s/los-angeles">Los Angeles</Link></li>
+      <li><Link to="/s/dallas">Dallas</Link></li>
+    </ul>
+  </div>
+);
 
-  const ping = async () => {
-    const API = import.meta.env.VITE_API_URL || "http://localhost:3000/api/v1";
-    const res = await fetch(`${API}/public/ping`);
-    setPong(await res.json());
-  };
-
-  return (
-    <div style={{ fontFamily: "sans-serif", padding: 24 }}>
-      <h1>Cre8-BOT Frontend</h1>
-      <p>Test de connexion avec l’API Render</p>
-      <button onClick={ping}>Tester l’API</button>
-      <pre style={{ background: "#f6f6f6", padding: 10 }}>
-        {pong ? JSON.stringify(pong, null, 2) : "Clique sur le bouton ↑"}
-      </pre>
-    </div>
-  );
-}
+const App = () => (
+  <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/s/:store" element={<StoreCheckin />} />
+    </Routes>
+  </BrowserRouter>
+);
 
 createRoot(document.getElementById("root")).render(<App />);
