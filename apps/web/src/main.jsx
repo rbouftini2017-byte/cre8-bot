@@ -1,28 +1,37 @@
 import React from "react";
 import { createRoot } from "react-dom/client";
-
-import { HashRouter as BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { HashRouter, Routes, Route, Link } from "react-router-dom";
+import Home from "./pages/Home.jsx";
 import StoreCheckin from "./pages/StoreCheckin.jsx";
 
-const Home = () => (
-  <div style={{ fontFamily: "sans-serif", padding: 24 }}>
-    <h1>Cre8-BOT</h1>
-    <p>Choisis un magasin pour commencer :</p>
-    <ul>
-      <li><Link to="/s/nyc">New York</Link></li>
-      <li><Link to="/s/los-angeles">Los Angeles</Link></li>
-      <li><Link to="/s/dallas">Dallas</Link></li>
-    </ul>
-  </div>
-);
+function Nav() {
+  return (
+    <nav style={{ padding: 12, borderBottom: "1px solid #eee" }}>
+      <Link to="/">Home</Link> | <Link to="/s/nyc">NYC</Link> |{" "}
+      <Link to="/s/los-angeles">Los Angeles</Link> |{" "}
+      <Link to="/s/dallas">Dallas</Link>
+    </nav>
+  );
+}
 
-const App = () => (
-  <BrowserRouter>
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/s/:store" element={<StoreCheckin />} />
-    </Routes>
-  </BrowserRouter>
-);
+function App() {
+  return (
+    <>
+      <Nav />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/s/:store" element={<StoreCheckin />} />
+        {/* Fallback: n'importe quelle autre route revient à l'accueil */}
+        <Route path="*" element={<Home />} />
+      </Routes>
+    </>
+  );
+}
 
-createRoot(document.getElementById("root")).render(<App />);
+createRoot(document.getElementById("root")).render(
+  <React.StrictMode>
+    <HashRouter>
+      <App />
+    </HashRouter>
+  </React.StrictMode>
+);
