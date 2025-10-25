@@ -1,17 +1,17 @@
 // apps/api/_db.js
-import { Pool } from "pg";
+import pg from "pg";
+
+const { Pool } = pg;
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  // optimisation vercel: pool réutilisé entre invocations
-  max: 5,
-  idleTimeoutMillis: 30000
+  ssl: { rejectUnauthorized: false }, // requis pour Neon/Vercel
 });
 
-export async function query(sql, params = []) {
+export async function query(text, params) {
   const client = await pool.connect();
   try {
-    const res = await client.query(sql, params);
+    const res = await client.query(text, params);
     return res;
   } finally {
     client.release();
