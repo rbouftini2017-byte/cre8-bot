@@ -5,8 +5,8 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
 
   try {
-    const { store, firstName, lastName, phone, email, service, garment } = req.body || {};
-    if (!store || !firstName || !lastName || !phone || !email || !service || !garment) {
+    const { store, firstName, lastName, phone, email, serive_type, garment } = req.body || {};
+    if (!store || !firstName || !lastName || !phone || !email || !serive_type || !garment) {
       return res.status(400).json({ message: "Missing fields" });
     }
 
@@ -45,10 +45,10 @@ export default async function handler(req, res) {
 
     // 3) créer commande
     const o = await query(
-      `INSERT INTO orders (store_id, customer_id, service, garment)
+      `INSERT INTO orders (store_id, customer_id, serive_type, garment)
        VALUES ($1,$2,$3,$4)
        RETURNING id, created_at`,
-      [storeId, customerId, service, garment]
+      [storeId, customerId, serive_type, garment]
     );
     const orderId = o.rows[0].id;
 
