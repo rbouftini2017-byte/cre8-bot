@@ -17,4 +17,18 @@
     "@vitejs/plugin-react": "4.2.0",
     "vite": "4.5.0"
   }
+  {
+  "name": "cre8-bot-web",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "preview": "vite preview",
+    "dev": "vite"
+  },
+  "dependencies": {
+    "pg": "^8.11.3"
+  }
+}
+
 }
