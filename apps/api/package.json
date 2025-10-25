@@ -1,0 +1,11 @@
+{
+  "name": "cre8-bot-api",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "vercel-build": "echo \"ok\""
+  },
+  "dependencies": {
+    "pg": "8.11.3"
+  }
+}
