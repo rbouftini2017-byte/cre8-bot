@@ -1,135 +1,105 @@
-import React, { useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
 
-const API_BASE = import.meta.env.VITE_API_URL || "/api";
+const API = import.meta.env.VITE_API_URL || "/api";
 
 export default function StoreCheckin() {
   const { store } = useParams();
-  const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
-    company: "",
-    phone: "",
-    email: "",
-    service: "DTF",
-    garment: "bring",
-    dayCode: "",
-  });
-  const [status, setStatus] = useState(null);
+  const navigate = useNavigate();
+  const [dayCode, setDayCode] = useState("");
+  const [firstName, setFirst] = useState("");
+  const [lastName, setLast] = useState("");
+  const [phone, setPhone] = useState("");
+  const [email, setEmail] = useState("");
+  const [service, setService] = useState("DTF");
+  const [garment, setGarment] = useState("bring");
+  const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
-
-  const onChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
   async function handleSubmit(e) {
     e.preventDefault();
     setLoading(true);
-    setStatus(null);
+    setResult(null);
 
-    try {
-      // 1) Vérifier le Day Code
-      const verify = await fetch(`${API_BASE}/daycode/verify`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ store, code: form.dayCode }),
-      });
-      const ok = await verify.json();
-      if (!verify.ok || !ok.valid) {
-        setStatus({ type: "error", msg: "Invalid Day Code. Please check with the staff." });
-        setLoading(false);
-        return;
-      }
+    // 1) Vérification Day Code
+    const v = await fetch(`${API}/daycode/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ store, code: dayCode }),
+    }).then(r => r.json()).catch(() => ({ valid: false }));
 
-      // 2) Check-in
-      const res = await fetch(`${API_BASE}/customers/checkin`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ store, ...form }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || "Check-in failed");
-
-      setStatus({
-        type: "success",
-        msg: `Check-in done! Your position is #${data.position}. Estimated wait: ${data.etaMinutes} min.`,
-      });
-    } catch (err) {
-      setStatus({ type: "error", msg: err.message });
-    } finally {
+    if (!v.valid) {
       setLoading(false);
+      setResult({ ok: false, msg: "Invalid Day Code" });
+      return;
     }
+
+    // 2) Check-in (mock)
+    const r = await fetch(`${API}/customers/checkin`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        store, firstName, lastName, phone, email, service, garment, dayCode
+      })
+    }).then(r => r.json()).catch(() => null);
+
+    setLoading(false);
+
+    if (!r) {
+      setResult({ ok: false, msg: "Server error" });
+      return;
+    }
+
+    setResult({
+      ok: true,
+      msg: `Check-in done! Your position is #${r.position}. Estimated wait: ${r.etaMinutes} min.`,
+    });
+
+    // Exemple de redirection plus tard :
+    // navigate(`/queue/${store}/${encodeURIComponent(phone)}`);
   }
 
   return (
-    <div style={{ fontFamily: "sans-serif", padding: 24, maxWidth: 680 }}>
-      <h2>Store: {store.toUpperCase()}</h2>
-      <p>Please enter today’s Day Code (ask the staff), then your details.</p>
+    <div style={{ padding: 24 }}>
+      <h2>Check-in — {store}</h2>
 
-      <form onSubmit={handleSubmit} style={{ display: "grid", gap: 12 }}>
-        <label>
-          Day Code *
-          <input
-            name="dayCode"
-            value={form.dayCode}
-            onChange={onChange}
-            required
-            placeholder="e.g. 1234"
-          />
-        </label>
+      <form onSubmit={handleSubmit} style={{ maxWidth: 480, display: "grid", gap: 8 }}>
+        <label>Day Code</label>
+        <input value={dayCode} onChange={e => setDayCode(e.target.value)} required />
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          <label>
-            First name *
-            <input name="firstName" value={form.firstName} onChange={onChange} required />
-          </label>
-          <label>
-            Last name *
-            <input name="lastName" value={form.lastName} onChange={onChange} required />
-          </label>
-        </div>
+        <label>First name</label>
+        <input value={firstName} onChange={e => setFirst(e.target.value)} required />
 
-        <label>
-          Company (optional)
-          <input name="company" value={form.company} onChange={onChange} />
-        </label>
+        <label>Last name</label>
+        <input value={lastName} onChange={e => setLast(e.target.value)} required />
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          <label>
-            Phone *
-            <input name="phone" value={form.phone} onChange={onChange} required />
-          </label>
-          <label>
-            Email *
-            <input type="email" name="email" value={form.email} onChange={onChange} required />
-          </label>
-        </div>
+        <label>Phone</label>
+        <input value={phone} onChange={e => setPhone(e.target.value)} required />
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
-          <label>
-            Service *
-            <select name="service" value={form.service} onChange={onChange}>
-              <option value="DTF">DTF</option>
-              <option value="Press">Press</option>
-              <option value="DTF+Press">DTF + Press</option>
-            </select>
-          </label>
+        <label>Email</label>
+        <input type="email" value={email} onChange={e => setEmail(e.target.value)} required />
 
-          <label>
-            Garment *
-            <select name="garment" value={form.garment} onChange={onChange}>
-              <option value="bring">Bring own</option>
-              <option value="buy">Buy on site</option>
-            </select>
-          </label>
-        </div>
+        <label>Service</label>
+        <select value={service} onChange={e => setService(e.target.value)}>
+          <option>DTF</option>
+          <option>Press</option>
+          <option>DTF+Press</option>
+        </select>
 
-        <button disabled={loading} type="submit">
-          {loading ? "Submitting…" : "Check-in"}
+        <label>Garment</label>
+        <select value={garment} onChange={e => setGarment(e.target.value)}>
+          <option value="bring">Bring own</option>
+          <option value="buy">Buy on site</option>
+        </select>
+
+        <button type="submit" disabled={loading}>
+          {loading ? "Processing..." : "Check-in"}
         </button>
       </form>
 
-      {status && (
-        <p style={{ marginTop: 16, color: status.type === "error" ? "crimson" : "green" }}>
-          {status.msg}
+      {result && (
+        <p style={{ marginTop: 12, color: result.ok ? "green" : "crimson" }}>
+          {result.msg}
         </p>
       )}
     </div>
