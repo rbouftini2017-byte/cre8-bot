@@ -70,7 +70,7 @@ export default async function handler(req, res) {
 
     // 4) event (d'après ta base, la table s'appelle "order_event")
     await query(
-      `INSERT INTO order_event (order_id, actor_role, actor_name, prev_status, new_status)
+      `INSERT INTO order_event (order_id, employee_role, employee_id, prev_status, new_status)
        VALUES ($1,'Agent','Front desk', NULL, 'PENDING_PAYMENT')`,
       [orderId]
     );
