@@ -1,4 +1,3 @@
-
 import pkg from "pg";
 const { Pool } = pkg;
 
@@ -15,4 +14,3 @@ export async function q(sql, params = []) {
     client.release();
   }
 }
-
