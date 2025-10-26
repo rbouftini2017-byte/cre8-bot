@@ -1,8 +1,9 @@
 {
+  "version": 2,
   "functions": {
     "api/**/*.js": {
-      "runtime": "nodejs18.x",
-      "includeFiles": "node_modules/pg/**"
+      "runtime": "nodejs20.x",
+      "includeFiles": ["node_modules/pg/**"]
     }
   }
 }
